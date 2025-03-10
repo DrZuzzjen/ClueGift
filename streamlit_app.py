@@ -202,14 +202,13 @@ def main():
     # RESTO DEL CÓDIGO NORMAL (solo se ejecuta si no hay consulta pendiente)
     # Título y bienvenida
     st.title(" 🎁Regalo Misterioso")
-    #st.markdown("<h3 class='subtitle'> ¿Estás lista para el desafío? 🔍🕵️‍♀️ </h3>", unsafe_allow_html=True)
+    st.markdown("<h3 class='subtitle'>¡Bienvenida Claude! ¿Estás lista para el desafío? 🔍🕵️‍♀️ </h3>", unsafe_allow_html=True)
     
     # Mensaje de bienvenida si no hay preguntas completadas
     if not st.session_state[KEY_COMPLETED_QUESTIONS]:
         st.markdown("""
         <div class="welcome-box">
             <h3>¡Bienvenida, Claude! 👋</h3>
-            <h3 class='subtitle'> ¿Estás lista para el desafío? 🔍🕵️‍♀️ </h3>
             <p>Te espera una aventura llena de misterios y acertijos. Cada respuesta correcta te acercará más a descubrir tu regalo de cumpleaños.</p>
             <p>¿Estás lista para comenzar este viaje de recuerdos? El Genio estará aquí para ayudarte si necesitás una mano.</p>
         </div>
@@ -355,6 +354,7 @@ def main():
         st.session_state[KEY_IS_CORRECT] = is_correct
         st.session_state[KEY_FEEDBACK] = feedback
         st.session_state[KEY_SUBMITTED] = True
+        st.snow()
         
         # SOLO si es correcta, avanzar a la siguiente pregunta
         if is_correct:
@@ -362,8 +362,17 @@ def main():
             if current_question['id'] not in st.session_state[KEY_COMPLETED_QUESTIONS]:
                 st.session_state[KEY_COMPLETED_QUESTIONS].append(current_question['id'])
             
-            # Efecto de celebración y avance
+            # Efecto de celebración con mensaje y pequeña pausa
             st.balloons()
+            
+            # Agregar un mensaje de éxito para confirmar visualmente
+            st.success("¡Respuesta correcta! Avanzando al siguiente acertijo...")
+            
+            # Pequeña pausa para dar tiempo a que se muestren los globos
+            import time
+            time.sleep(1.5)
+            
+            # Avanzar a la siguiente pregunta
             advance_to_next_question()
             st.rerun()
 
