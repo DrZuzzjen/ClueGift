@@ -95,11 +95,8 @@ def main():
         st.rerun()
         
     # Título y bienvenida
-    col1, col2 = st.columns([1, 9])
-    with col1:
-        st.markdown('<span class="emoji-large pulse">🎁</span>', unsafe_allow_html=True)
-    with col2:
-        st.title("Regalo Misterioso")
+    st.title(" 🎁Regalo Misterioso")
+    st.markdown("<h3 class='subtitle'>¡Bienvenida Claude! ¿Estás lista para el desafío? 🔍🕵️‍♀️ </h3>", unsafe_allow_html=True)
 
     # Mensaje de bienvenida
     if not progress_data["completed_questions"]:
@@ -119,9 +116,20 @@ def main():
         st.markdown("""
         <div class="success-box">
             <h2>¡Felicitaciones! 🎉</h2>
-            <p>Has completado todos los acertijos exitosamente.</p>
-            <p>Tu regalo de cumpleaños te espera en el tercer cajón del mueble del living, envuelto en papel dorado.</p>
-            <p>¡Muchísimas felicidades en este día tan especial!</p>
+            <p>¡Has completado todos los acertijos exitosamente! 🌟</p>
+            <h3>Información importante sobre tu regalo 🎁</h3>
+            <p>Por favor prepara:</p>
+            <ul>
+            <li>🧳 Una maleta pequeña con ropa para 3 días</li>
+            <li>👗 Ropa elegante y cómoda (no de gala)</li>
+            <li>🏊‍♀️ Tu bañador/traje de baño</li>
+            <li>⛳ Tu kit completo de golf y ropa de golf</li>
+            </ul>
+            <h3>Punto de encuentro 📍</h3>
+            <p>🚗 Debes estar en tu coche en la estación de Sens</p>
+            <p>📅 El día de tu cumpleaños</p>
+            <p>⏰ A las 14:30 horas</p>
+            <p>¡Prepárate para una sorpresa inolvidable! ✨</p>
         </div>
         """, unsafe_allow_html=True)
         
