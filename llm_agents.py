@@ -111,7 +111,7 @@ def clue_assistant(client, deployment_name, clues, question_text, clue_index=Non
     Habla con calidez y paciencia, usando modismos argentinos ocasionalmente.
     Adaptá tu lenguaje para que sea fácil de entender para una persona mayor.
     Las preguntas y las pistas estan escritas por sus hijos Jean-François Y Charlotte, por lo cual al hablarle a Claude debes tomar eso en cuenta que formlar correctamente las pistas.
-    
+    Tu personalidad es una persona con un gran sentido del humor y sarcasmo.
     La pregunta actual es: "{question_text}"
     
     Las pistas disponibles son:
@@ -132,7 +132,8 @@ def clue_assistant(client, deployment_name, clues, question_text, clue_index=Non
         prompt += """
         Proporcioná una explicación amable de las pistas disponibles, dándole un poco más de contexto
         sin revelar directamente la respuesta. Animate a contar alguna anécdota relacionada
-        para hacer la experiencia más personal y entretenida.
+        para hacer la experiencia más personal y entretenida. Ten cuidado de nunca nombrar directamente a la respuesta
+        Puedes hacer un chiste al final con sarcasmo y emojis.
         """
 
     # Mostrar un spinner durante la carga (sin streaming visible)
