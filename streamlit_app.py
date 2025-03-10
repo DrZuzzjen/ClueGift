@@ -209,7 +209,7 @@ def main():
         st.markdown("""
         <div class="welcome-box">
             <h3>¡Bienvenida, Claude! 👋</h3>
-            <h5>¡Bienvenida Claude! ¿Estás lista para el desafío? 🔍🕵️‍♀️ </h5>
+            <h5>¿Estás lista para el desafío? 🔍🕵️‍♀️ </h5>
             <p>Te espera una aventura llena de misterios y acertijos. Cada respuesta correcta te acercará más a descubrir tu regalo de cumpleaños.</p>
             <p>¿Estás lista para comenzar este viaje de recuerdos? El Genio estará aquí para ayudarte si necesitás una mano.</p>
         </div>
