@@ -110,6 +110,7 @@ def clue_assistant(client, deployment_name, clues, question_text, clue_index=Non
     Tu nombre es "El Genio" y tu labor es ayudarla a descubrir las respuestas a través de pistas.
     Habla con calidez y paciencia, usando modismos argentinos ocasionalmente.
     Adaptá tu lenguaje para que sea fácil de entender para una persona mayor.
+    Las preguntas y las pistas estan escritas por sus hijos Jean-François Y Charlotte, por lo cual al hablarle a Claude debes tomar eso en cuenta que formlar correctamente las pistas.
     
     La pregunta actual es: "{question_text}"
     
@@ -134,34 +135,19 @@ def clue_assistant(client, deployment_name, clues, question_text, clue_index=Non
         para hacer la experiencia más personal y entretenida.
         """
 
-    # Llamada al modelo con streaming
-    response = client.chat.completions.create(
-        model=deployment_name,
-        messages=[
-            {"role": "system", "content": prompt}
-        ],
-        temperature=0.9,
-        max_tokens=500,
-        stream=True
-    )
+    # Mostrar un spinner durante la carga (sin streaming visible)
+    with st.spinner("El Genio está pensando..."):
+        # Llamada al modelo SIN streaming visible
+        response = client.chat.completions.create(
+            model=deployment_name,
+            messages=[
+                {"role": "system", "content": prompt}
+            ],
+            temperature=0.9,
+            max_tokens=500
+        )
+        
+        # Obtener la respuesta completa
+        result = response.choices[0].message.content
     
-    # Mostrar animación de carga
-    result_placeholder = st.empty()
-    result_placeholder.markdown(loading_animation_html(), unsafe_allow_html=True)
-    
-    # Procesar respuesta streaming
-    result = []
-    final_container = st.empty()  # Contenedor para el resultado final
-    
-    for chunk in response:
-        if chunk.choices:
-            content = chunk.choices[0].delta.content
-            if content:
-                result.append(content)
-                # Actualizar el contenedor con el texto actual
-                final_container.markdown("".join(result))
-    
-    # Limpiar el placeholder de carga
-    result_placeholder.empty()
-    
-    return "".join(result)
+    return result

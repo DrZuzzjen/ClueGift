@@ -1,93 +1,93 @@
 total_questions: 13
 questions:
   - id: 1
-    question: "Un puntito verde que sube y baja. ¿Que es?"
+    question: "Un puntito verde que sube y baja. ¿Qué es?"
     answer: "Una arveja en un ascensor"
     clues:
-      - "Un chiste que siempre contabas cuando eramos niños"
-      - "Tu hijo de hizo una cancion con este chiste"
-      - "Es una verdura en una situacion particular."
+      - "Un chiste que siempre contabas cuando éramos niños"
+      - "Tu hijo te hizo una canción con este chiste"
+      - "Es una verdura en una situación particular."
   - id: 2
-    question: "Como se llamaba el colegio iba JF antes de el Herman Hollerith?"
-    answer: "IMEP ( Instituto de Enseñansa Mixta Privada)"
+    question: "¿Cómo se llamaba el colegio al que iba JF antes del Herman Hollerith?"
+    answer: "IMEP (Instituto de Enseñanza Mixta Privada)"
     clues:
-      - "JF hizo alli mas de 1 año de primaria."
-      - "Antes de viajar a Francia, JF salio de ahi con un ojo hinchado despues que un compañero se le cayera encima."
-      - "Estaba en la calle Cordoba. cerca del Club Tucuman de Gimnasia."
+      - "JF hizo allí más de 1 año de primaria."
+      - "Antes de viajar a Francia, JF salió de ahí con un ojo hinchado después que un compañero se le cayera encima."
+      - "Estaba en la calle Córdoba, cerca del Club Tucumán de Gimnasia."
   - id: 3
-    question: "Que personaje ficticio interpreto JF en la facultad de Quimica de Tucuman?"
-    answer: "Cientifico Loco"
+    question: "¿Qué personaje ficticio interpretó JF en la facultad de Química de Tucumán?"
+    answer: "Científico Loco"
     clues:
-      - "ES un personaje para un corto"
-      - "Le gustaba gritar en aleman."
-      - "Podriamos decir que no estaba muy cuerdo."
+      - "Es un personaje para un corto"
+      - "Le gustaba gritar en alemán."
+      - "Podríamos decir que no estaba muy cuerdo."
   - id: 4
-    question: "Cuántas veces tuvo un yeso tu hija?"
+    question: "¿Cuántas veces tuvo un yeso tu hija?"
     answer: "6 veces"
     clues:
-      - "menos 8 más de 4"
-      - "el dedo operado cuenta como yeso"
-      - "el último fue a los 12 años"
+      - "Menos 8 más de 4"
+      - "El dedo operado cuenta como yeso"
+      - "El último fue a los 12 años"
   - id: 5
-    question: "cuál era el almuerzo predilecto de tu hija para ir al cole en la primaria?"
-    answer: "partitas de pollo con ensalada de tomate"
+    question: "¿Cuál era el almuerzo predilecto de tu hija para ir al cole en la primaria?"
+    answer: "Patitas de pollo con ensalada de tomate"
     clues:
-      - "claramente tiene que llevar verdura"
-      - "en mcdonals también se puede comer"
-      - "es una proteína + acompañamiento"
+      - "Claramente tiene que llevar verdura"
+      - "En McDonald's también se puede comer"
+      - "Es una proteína + acompañamiento"
   - id: 6
-    question: "cuál es la frase que SIEMPRE decías cuando nos hacías jugo de naranja?"
-    answer: "tómalo rápido que las vitaminas se van (desaparecen,etc.)"
+    question: "¿Cuál es la frase que SIEMPRE decías cuando nos hacías jugo de naranja?"
+    answer: "Tómalo rápido que las vitaminas se van (desaparecen, etc.)"
     clues:
-      - "esta científicamente comprobado que no es cierta esa frase"
-      - "un refrán que puede ayudarte \"camarón que se duerme se lo lleva la corriente\""
-      - "se relaciona con la rapidez para aprovechar algo"
+      - "Está científicamente comprobado que no es cierta esa frase"
+      - "Un refrán que puede ayudarte: \"Camarón que se duerme se lo lleva la corriente\""
+      - "Se relaciona con la rapidez para aprovechar algo"
   - id: 7
-    question: "Telefono de la Buenos Aires 614?"
+    question: "¿Teléfono de la Buenos Aires 614?"
     answer: "4204041"
     clues:
       - "Empieza con 4..."
       - "420..."
       - "Es un número que marcaste muchas veces"
   - id: 8
-    question: "Que incendiaron JF y Charlotte?"
-    answer: "Un terreno en tafi del valle (un terreno de un vecino)"
+    question: "¿Qué incendiaron JF y Charlotte?"
+    answer: "Un terreno en Tafí del Valle (un terreno de un vecino)"
     clues:
       - "No lo pudieron apagar con agua"
       - "No fue en una casa"
-      - "Fue en Tafi del Valle"
+      - "Fue en Tafí del Valle"
   - id: 9
-    question: "La patente del Duna Weekend"
+    question: "¿La patente del Duna Weekend?"
     answer: "REU 081"
     clues:
       - "R-- --1"
       - "También podría ser REU 381"
       - "Era de un auto familiar"
   - id: 10
-    question: "Por donde no querias pasar cuando conducias en tucuman despues de que te escapaste de un barita? (el tipo que controla el transito)"
-    answer: "Al frente de la terminal de omnibus / Av Brigido Teran"
+    question: "¿Por dónde no querías pasar cuando conducías en Tucumán después de que te escapaste de un barita? (el tipo que controla el tránsito)"
+    answer: "Al frente de la terminal de ómnibus / Av. Brígido Terán"
     clues:
       - "Cerca del parque 9 de julio"
       - "Es una avenida importante"
       - "Hay mucho movimiento de pasajeros"
   - id: 11
-    question: "Nombre informal del memorable bar tel parque, cuyo mote deriva de una de sus atracciones para niños."
-    answer: "El Tobogan Torcido"
+    question: "¿Nombre informal del memorable bar del parque, cuyo mote deriva de una de sus atracciones para niños?"
+    answer: "El Tobogán Torcido"
     clues:
       - "Era amarillo"
-      - "Era un Tobogán"
+      - "Era un tobogán"
       - "Un lugar donde los niños se divertían"
   - id: 12
-    question: "Codigo postal, de S.M. de Tucuman?"
+    question: "¿Código postal de S.M. de Tucumán?"
     answer: "4000"
     clues:
       - "Es un número redondo"
       - "Empieza con 4"
       - "Son 4 dígitos"
   - id: 13
-    question: "Tu corte favorito de Asado?"
+    question: "¿Tu corte favorito de asado?"
     answer: "Tira de asado, con sabor a brasas."
     clues:
-      - "un corte finito"
-      - "con gusto a brasas."
+      - "Un corte finito"
+      - "Con gusto a brasas."
       - "Se cocina en la parrilla"

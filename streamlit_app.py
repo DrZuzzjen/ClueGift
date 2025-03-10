@@ -26,6 +26,7 @@ KEY_SUBMITTED = "submitted"
 KEY_GENIUS_RESPONSE = "genius_response"
 KEY_SHOW_GENIUS = "show_genius"
 KEY_GAME_COMPLETED = "game_completed"
+KEY_PENDING_GENIUS_QUERY = "pending_genius_query"
 
 @st.dialog("Mensaje del Genio 🧞‍♂️", width="large")
 def genius_dialog(message):
@@ -64,6 +65,7 @@ def initialize_session():
         st.session_state[KEY_GENIUS_RESPONSE] = ""
         st.session_state[KEY_SHOW_GENIUS] = False
         st.session_state[KEY_GAME_COMPLETED] = False
+        st.session_state[KEY_PENDING_GENIUS_QUERY] = None
         # Eliminamos la entrada user_input para evitar problemas con el widget
         if "user_input" in st.session_state:
             del st.session_state["user_input"]
@@ -161,15 +163,53 @@ def main():
     # Cargar datos
     clues_data = load_clues()
     
+    # PRIMERO: Verificar si hay una consulta pendiente al genio
+    if st.session_state.get(KEY_PENDING_GENIUS_QUERY) is not None:
+        # Mostrar SOLO un spinner a pantalla completa y nada más
+        with st.spinner("El Genio está pensando..."):
+            current_question = get_current_question(clues_data)
+            
+            # Obtener pistas reveladas para el asistente
+            revealed_clues_content = []
+            for i in st.session_state[KEY_REVEALED_CLUES]:
+                if i < len(current_question['clues']):
+                    revealed_clues_content.append(current_question['clues'][i])
+            
+            # Obtener respuesta del Genio
+            user_query = st.session_state[KEY_PENDING_GENIUS_QUERY]
+            genius_response = clue_assistant(
+                client,
+                deployment_name,
+                current_question['clues'],
+                current_question['question'],
+                len(revealed_clues_content) - 1 if revealed_clues_content else -1,
+                user_query
+            )
+            
+            # Guardar la respuesta y limpiar la consulta pendiente
+            st.session_state[KEY_GENIUS_RESPONSE] = genius_response
+            st.session_state[KEY_SHOW_GENIUS] = True
+            st.session_state[KEY_PENDING_GENIUS_QUERY] = None
+
+        # Mostrar el diálogo inmediatamente después de obtener la respuesta
+        if st.session_state[KEY_SHOW_GENIUS] and st.session_state[KEY_GENIUS_RESPONSE]:
+            genius_dialog(st.session_state[KEY_GENIUS_RESPONSE])
+            # No hacer rerun aquí para evitar bucles
+        
+        # Detener la ejecución aquí para no mostrar el resto de la interfaz
+        st.stop()
+    
+    # RESTO DEL CÓDIGO NORMAL (solo se ejecuta si no hay consulta pendiente)
     # Título y bienvenida
     st.title(" 🎁Regalo Misterioso")
-    st.markdown("<h3 class='subtitle'>¡Bienvenida Claude! ¿Estás lista para el desafío? 🔍🕵️‍♀️ </h3>", unsafe_allow_html=True)
+    #st.markdown("<h3 class='subtitle'> ¿Estás lista para el desafío? 🔍🕵️‍♀️ </h3>", unsafe_allow_html=True)
     
     # Mensaje de bienvenida si no hay preguntas completadas
     if not st.session_state[KEY_COMPLETED_QUESTIONS]:
         st.markdown("""
         <div class="welcome-box">
             <h3>¡Bienvenida, Claude! 👋</h3>
+            <h3 class='subtitle'> ¿Estás lista para el desafío? 🔍🕵️‍♀️ </h3>
             <p>Te espera una aventura llena de misterios y acertijos. Cada respuesta correcta te acercará más a descubrir tu regalo de cumpleaños.</p>
             <p>¿Estás lista para comenzar este viaje de recuerdos? El Genio estará aquí para ayudarte si necesitás una mano.</p>
         </div>
@@ -327,7 +367,7 @@ def main():
             advance_to_next_question()
             st.rerun()
 
-    # Procesar solicitud de ayuda al Genio - movido después del procesamiento de respuesta
+    # Procesar solicitud de ayuda al Genio
     if help_button and user_answer:
         # Limpiar cualquier estado previo del genio
         st.session_state[KEY_SHOW_GENIUS] = False
@@ -339,7 +379,7 @@ def main():
             if i < len(current_question['clues']):
                 revealed_clues_content.append(current_question['clues'][i])
         
-        # Obtener respuesta del Genio
+        # Obtener respuesta del Genio (ahora sin streaming visible)
         genius_response = clue_assistant(
             client,
             deployment_name,
