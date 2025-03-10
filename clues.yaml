@@ -1,0 +1,30 @@
+total_questions: 4
+questions:
+  - id: 1
+    question: "¿Cuál fue el nombre de la primera mascota que tuve cuando nos conocimos?"
+    answer: "Canela"
+    clues:
+      - "Era peluda y muy cariñosa."
+      - "Su nombre es también un condimento muy común en la cocina."
+      - "Era una perrita de color marrón rojizo."
+  - id: 2
+    question: "¿En qué año nos conocimos?"
+    answer: "1972"
+    clues:
+      - "Fue en la década de los 70s."
+      - "En ese año Perón volvió a Argentina."
+      - "Hace exactamente 52 años atrás."
+  - id: 3
+    question: "¿Cuál era el nombre del café donde solíamos reunirnos?"
+    answer: "El Refugio"
+    clues:
+      - "Era un lugar acogedor donde nos sentíamos como en casa."
+      - "Su nombre sugiere un espacio donde uno puede protegerse."
+      - "Comenzaba con la letra E y tenía dos palabras."
+  - id: 4
+    question: "¿Qué regalo te di en tu cumpleaños número 30?"
+    answer: "Un collar de perlas"
+    clues:
+      - "Es algo que se usa como accesorio."
+      - "Viene del mar y es muy valioso."
+      - "Es blanco y redondo, y viene en una cadena."
