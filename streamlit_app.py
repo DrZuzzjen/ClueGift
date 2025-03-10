@@ -202,13 +202,14 @@ def main():
     # RESTO DEL CÓDIGO NORMAL (solo se ejecuta si no hay consulta pendiente)
     # Título y bienvenida
     st.title(" 🎁Regalo Misterioso")
-    st.markdown("<h3 class='subtitle'>¡Bienvenida Claude! ¿Estás lista para el desafío? 🔍🕵️‍♀️ </h3>", unsafe_allow_html=True)
+    #st.markdown("<h3 class='subtitle'>¡Bienvenida Claude! ¿Estás lista para el desafío? 🔍🕵️‍♀️ </h3>", unsafe_allow_html=True)
     
     # Mensaje de bienvenida si no hay preguntas completadas
     if not st.session_state[KEY_COMPLETED_QUESTIONS]:
         st.markdown("""
         <div class="welcome-box">
             <h3>¡Bienvenida, Claude! 👋</h3>
+            <h5>¡Bienvenida Claude! ¿Estás lista para el desafío? 🔍🕵️‍♀️ </h5>
             <p>Te espera una aventura llena de misterios y acertijos. Cada respuesta correcta te acercará más a descubrir tu regalo de cumpleaños.</p>
             <p>¿Estás lista para comenzar este viaje de recuerdos? El Genio estará aquí para ayudarte si necesitás una mano.</p>
         </div>
