@@ -148,6 +148,58 @@ def load_css():
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-15px); }
         }
+        
+        /* Indicadores de pistas */
+        .clue-indicators {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 15px;
+        }
+        .clue-indicator {
+            width: 30px;
+            height: 30px;
+            font-size: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .clue-indicator-on {
+            color: #FFD700;
+            text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700;
+        }
+        .clue-indicator-off {
+            color: rgba(255,215,0,0.3);
+        }
+        .clue-indicator-on {
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 5px #FFD700, 0 0 10px #FFD700;
+            }
+            to {
+                text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700, 0 0 30px #FFD700;
+            }
+        }
+        
+        /* Botón de revelar pista */
+        .reveal-clue-btn {
+            text-align: center;
+            margin: 15px 0;
+        }
+        .hidden-clue {
+            background: rgba(147, 112, 219, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px dashed rgba(255,215,0,0.3);
+            text-align: center;
+            cursor: pointer;
+        }
+        .hidden-clue:hover {
+            background: rgba(147, 112, 219, 0.2);
+            border: 2px dashed rgba(255,215,0,0.5);
+        }
     </style>
     """, unsafe_allow_html=True)
 

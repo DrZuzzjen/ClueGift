@@ -69,7 +69,8 @@ def main():
     if 'initialized' not in st.session_state:
         st.session_state.initialized = True
         st.session_state.showing_clue = False
-        st.session_state.last_clue_index = progress_data["clues_revealed"]
+        st.session_state.last_clue_index = -1  # Cambiado a -1 para que no se revele ninguna pista inicialmente
+        st.session_state.revealed_clues = []  # Nueva lista para rastrear pistas reveladas
         st.session_state.answer_submitted = False
         st.session_state.answer_correct = False
         st.session_state.answer_feedback = ""
@@ -83,7 +84,8 @@ def main():
     # Verificar si se solicitó un reinicio (a través del querystring)
     if 'reset' in st.query_params and st.query_params['reset'] == 'true':
         progress_data = reset_progress()
-        st.session_state.last_clue_index = 0
+        st.session_state.last_clue_index = -1
+        st.session_state.revealed_clues = []
         st.session_state.answer_submitted = False
         st.session_state.answer_correct = False
         st.session_state.answer_feedback = ""
@@ -159,24 +161,44 @@ def main():
     # Sección para pistas
     st.markdown("### Pistas disponibles:")
     
-    # Control de revelación de pistas
+    # Mostrar indicadores de pistas disponibles (bombillas)
     max_clues = len(current_question['clues'])
-    clues_revealed = min(st.session_state.last_clue_index + 1, max_clues)
     
-    for i in range(clues_revealed):
-        st.markdown(f"""
-        <div class="clue-box">
-            <p>🔍 {current_question['clues'][i]}</p>
-        </div>
-        """, unsafe_allow_html=True)
+    # Crear HTML para los indicadores de pistas
+    clue_indicators_html = '<div class="clue-indicators">'
+    for i in range(max_clues):
+        if i in st.session_state.revealed_clues:
+            clue_indicators_html += f'<div class="clue-indicator clue-indicator-on">💡</div>'
+        else:
+            clue_indicators_html += f'<div class="clue-indicator clue-indicator-off">💡</div>'
+    clue_indicators_html += '</div>'
     
-    # Botón para revelar más pistas si están disponibles
-    if clues_revealed < max_clues and not st.session_state.answer_correct:
-        if st.button("Revelar otra pista 🔎"):
-            st.session_state.last_clue_index += 1
-            progress_data["clues_revealed"] = st.session_state.last_clue_index
-            save_progress(progress_data)
-            st.rerun()
+    st.markdown(clue_indicators_html, unsafe_allow_html=True)
+    
+    # Mostrar pistas ya reveladas
+    for i in st.session_state.revealed_clues:
+        if i < max_clues:
+            st.markdown(f"""
+            <div class="clue-box">
+                <p>🔍 {current_question['clues'][i]}</p>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    # Botón para revelar una pista
+    if len(st.session_state.revealed_clues) < max_clues and not st.session_state.answer_correct:
+        next_clue_index = 0
+        while next_clue_index in st.session_state.revealed_clues and next_clue_index < max_clues:
+            next_clue_index += 1
+            
+        if next_clue_index < max_clues:
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                if st.button("Revelar pista 💡"):
+                    st.session_state.revealed_clues.append(next_clue_index)
+                    st.session_state.last_clue_index = next_clue_index
+                    progress_data["clues_revealed"] = next_clue_index
+                    save_progress(progress_data)
+                    st.rerun()
     
     # Área para ingresar respuesta
     st.markdown("### Tu respuesta:")
@@ -215,7 +237,8 @@ def main():
             progress_data["clues_revealed"] = 0
             save_progress(progress_data)
             
-            st.session_state.last_clue_index = 0
+            st.session_state.last_clue_index = -1
+            st.session_state.revealed_clues = []
             time.sleep(2)  # Pausa para celebración
             st.balloons()
             st.rerun()
@@ -227,17 +250,28 @@ def main():
         
         st.markdown("### El Genio dice:")
         
+        # Obtener las pistas reveladas para pasar al asistente
+        revealed_clues_content = []
+        for i in st.session_state.revealed_clues:
+            if i < len(current_question['clues']):
+                revealed_clues_content.append(current_question['clues'][i])
+        
         # Pasar la consulta del usuario al Genio
         genius_response = clue_assistant(
             client,
             deployment_name,
             current_question['clues'], 
             current_question['question'],
-            st.session_state.last_clue_index,
+            len(revealed_clues_content) - 1 if revealed_clues_content else -1,
             user_answer  # Pasar la consulta del usuario
         )
         
         st.session_state.genius_response = genius_response
+        st.markdown(f"""
+        <div class="clue-box">
+            <p>{genius_response}</p>
+        </div>
+        """, unsafe_allow_html=True)
     
     # Mostrar retroalimentación de respuesta
     if st.session_state.answer_submitted:
