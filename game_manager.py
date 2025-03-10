@@ -60,7 +60,24 @@ def get_current_question(clues_data, progress_data):
         dict: Pregunta actual o None si no se encuentra
     """
     current_id = progress_data["current_question"]
+    
+    # Simplemente buscar y retornar la pregunta actual
     for question in clues_data["questions"]:
         if question["id"] == current_id:
             return question
+            
     return None
+
+def advance_to_next_question(progress_data):
+    """
+    Avanza a la siguiente pregunta no completada.
+    
+    Args:
+        progress_data (dict): Datos del progreso actual
+        
+    Returns:
+        int: ID de la siguiente pregunta
+    """
+    progress_data["current_question"] += 1
+    save_progress(progress_data)
+    return progress_data["current_question"]

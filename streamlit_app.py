@@ -1,36 +1,110 @@
 """
-Regalo Misterioso - Una aplicación de acertijos con IA para una experiencia de regalo de cumpleaños.
+Regalo Misterioso - Versión 2 - Estado completamente en memoria
+Una aplicación de acertijos con IA para una experiencia de regalo de cumpleaños.
 """
 import os
 import time
-from datetime import datetime
+import yaml
 from dotenv import load_dotenv
 import streamlit as st
 
 # Importar módulos refactorizados
 from style import load_css, reset_button_js, loading_animation_html
 from llm_agents import initialize_client, answer_grader, clue_assistant
-from game_manager import (
-    load_clues, load_progress, save_progress, 
-    reset_progress, get_current_question
-)
 
-# Cargar variables de entorno (para desarrollo local)
+# Cargar variables de entorno
 load_dotenv()
 
-# Configuración de página de Streamlit
-st.set_page_config(
-    page_title="Regalo Misterioso 🎁",
-    page_icon="🎁",
-    layout="centered",
-    initial_sidebar_state="collapsed",
-)
+# Constantes para claves de session_state
+KEY_INITIALIZED = "initialized"
+KEY_CURRENT_QUESTION_ID = "current_question_id"
+KEY_COMPLETED_QUESTIONS = "completed_questions"
+KEY_REVEALED_CLUES = "revealed_clues" 
+KEY_FEEDBACK = "feedback"
+KEY_IS_CORRECT = "is_correct"
+KEY_SUBMITTED = "submitted"
+KEY_GENIUS_RESPONSE = "genius_response"
+KEY_SHOW_GENIUS = "show_genius"
+KEY_GAME_COMPLETED = "game_completed"
 
-# Cargar estilos CSS
-load_css()
+@st.dialog("Mensaje del Genio 🧞‍♂️", width="large")
+def genius_dialog(message):
+    """Diálogo modal para mostrar mensajes del Genio."""
+    st.markdown("""
+        <div style='text-align: center; margin-bottom: 1rem;'>
+            <span style='font-size: 4rem;'>🧞‍♂️</span>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown(f"""
+        <div style='background: rgba(147, 112, 219, 0.2); padding: 20px; border-radius: 10px; margin: 1rem 0;'>
+            {message}
+        </div>
+    """, unsafe_allow_html=True)
+    
+    if st.button("✨ Entendido", type="primary", use_container_width=True):
+        st.session_state[KEY_SHOW_GENIUS] = False
+        st.rerun()
 
-# Obtener credenciales (primero de secrets de Streamlit, luego de variables de entorno)
+def load_clues():
+    """Cargar las preguntas y respuestas desde el archivo YAML."""
+    with open("clues.yaml", 'r', encoding='utf-8') as file:
+        return yaml.safe_load(file)
+
+def initialize_session():
+    """Inicializar el estado de la sesión si es necesario."""
+    if KEY_INITIALIZED not in st.session_state:
+        st.session_state[KEY_INITIALIZED] = True
+        st.session_state[KEY_CURRENT_QUESTION_ID] = 1
+        st.session_state[KEY_COMPLETED_QUESTIONS] = []
+        st.session_state[KEY_REVEALED_CLUES] = []
+        st.session_state[KEY_FEEDBACK] = ""
+        st.session_state[KEY_IS_CORRECT] = False
+        st.session_state[KEY_SUBMITTED] = False
+        st.session_state[KEY_GENIUS_RESPONSE] = ""
+        st.session_state[KEY_SHOW_GENIUS] = False
+        st.session_state[KEY_GAME_COMPLETED] = False
+        # Eliminamos la entrada user_input para evitar problemas con el widget
+        if "user_input" in st.session_state:
+            del st.session_state["user_input"]
+
+def reset_game():
+    """Reiniciar todo el juego."""
+    st.session_state[KEY_CURRENT_QUESTION_ID] = 1
+    st.session_state[KEY_COMPLETED_QUESTIONS] = []
+    st.session_state[KEY_REVEALED_CLUES] = []
+    st.session_state[KEY_FEEDBACK] = ""
+    st.session_state[KEY_IS_CORRECT] = False
+    st.session_state[KEY_SUBMITTED] = False
+    st.session_state[KEY_GENIUS_RESPONSE] = ""
+    st.session_state[KEY_SHOW_GENIUS] = False
+    st.session_state[KEY_GAME_COMPLETED] = False
+    # Eliminamos la entrada user_input para evitar problemas con el widget
+    if "user_input" in st.session_state:
+        del st.session_state["user_input"]
+    st.rerun()
+
+def get_current_question(clues_data):
+    """Obtener la pregunta actual basada en el ID almacenado en la sesión."""
+    current_id = st.session_state[KEY_CURRENT_QUESTION_ID]
+    
+    for question in clues_data["questions"]:
+        if question["id"] == current_id:
+            return question
+            
+    return None
+
+def advance_to_next_question():
+    """Avanzar a la siguiente pregunta."""
+    st.session_state[KEY_CURRENT_QUESTION_ID] += 1
+    st.session_state[KEY_REVEALED_CLUES] = []
+    st.session_state[KEY_SUBMITTED] = False
+    st.session_state[KEY_FEEDBACK] = ""
+    if "user_input" in st.session_state:
+        del st.session_state["user_input"]
+
 def get_credentials():
+    """Obtener credenciales para la API de Azure OpenAI."""
     try:
         # Intentar obtener de secrets de Streamlit (para despliegue)
         api_key = st.secrets["azure_openai"]["AZURE_OPENAI_API_KEY"]
@@ -46,15 +120,38 @@ def get_credentials():
     
     return api_key, endpoint, api_version, deployment_name
 
-# Función para mostrar la animación de carga
-def display_loading_animation():
-    with st.container():
-        col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
-        with col3:
-            st.markdown(loading_animation_html(), unsafe_allow_html=True)
-
-# Función principal de la aplicación
 def main():
+    # Configurar la página
+    st.set_page_config(
+        page_title="Regalo Misterioso 🎁",
+        page_icon="🎁",
+        layout="centered",
+        initial_sidebar_state="collapsed"
+    )
+    
+    # Usar el tema oscuro
+    st.markdown("""
+        <style>
+            [data-testid="stAppViewContainer"] {
+                background: linear-gradient(135deg, #2a0845, #6441A5);
+            }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    # Cargar estilos CSS
+    load_css()
+    
+    # Botón de reinicio (arriba a la derecha)
+    reset_button_js()
+    
+    # Inicializar el estado de la sesión
+    initialize_session()
+    
+    # Verificar si se solicitó un reinicio
+    if 'reset' in st.query_params and st.query_params['reset'] == 'true':
+        reset_game()
+        st.query_params.clear()
+    
     # Obtener credenciales
     api_key, endpoint, api_version, deployment_name = get_credentials()
     
@@ -63,45 +160,13 @@ def main():
     
     # Cargar datos
     clues_data = load_clues()
-    progress_data = load_progress()
     
-    # Inicializar session_state si es necesario
-    if 'initialized' not in st.session_state:
-        st.session_state.initialized = True
-        st.session_state.showing_clue = False
-        st.session_state.last_clue_index = -1  # Cambiado a -1 para que no se revele ninguna pista inicialmente
-        st.session_state.revealed_clues = []  # Nueva lista para rastrear pistas reveladas
-        st.session_state.answer_submitted = False
-        st.session_state.answer_correct = False
-        st.session_state.answer_feedback = ""
-        st.session_state.need_genius_help = False
-        st.session_state.genius_response = ""
-        st.session_state.game_completed = False
-    
-    # Botón de reinicio (arriba a la derecha)
-    reset_button_js()
-    
-    # Verificar si se solicitó un reinicio (a través del querystring)
-    if 'reset' in st.query_params and st.query_params['reset'] == 'true':
-        progress_data = reset_progress()
-        st.session_state.last_clue_index = -1
-        st.session_state.revealed_clues = []
-        st.session_state.answer_submitted = False
-        st.session_state.answer_correct = False
-        st.session_state.answer_feedback = ""
-        st.session_state.need_genius_help = False
-        st.session_state.genius_response = ""
-        st.session_state.game_completed = False
-        # Limpiar el querystring
-        st.query_params.clear()  
-        st.rerun()
-        
     # Título y bienvenida
     st.title(" 🎁Regalo Misterioso")
     st.markdown("<h3 class='subtitle'>¡Bienvenida Claude! ¿Estás lista para el desafío? 🔍🕵️‍♀️ </h3>", unsafe_allow_html=True)
-
-    # Mensaje de bienvenida
-    if not progress_data["completed_questions"]:
+    
+    # Mensaje de bienvenida si no hay preguntas completadas
+    if not st.session_state[KEY_COMPLETED_QUESTIONS]:
         st.markdown("""
         <div class="welcome-box">
             <h3>¡Bienvenida, Claude! 👋</h3>
@@ -109,11 +174,11 @@ def main():
             <p>¿Estás lista para comenzar este viaje de recuerdos? El Genio estará aquí para ayudarte si necesitás una mano.</p>
         </div>
         """, unsafe_allow_html=True)
-
+    
     # Verificar si el juego se ha completado
-    if len(progress_data["completed_questions"]) >= clues_data["total_questions"]:
-        if not st.session_state.game_completed:
-            st.session_state.game_completed = True
+    if len(st.session_state[KEY_COMPLETED_QUESTIONS]) >= clues_data["total_questions"]:
+        if not st.session_state[KEY_GAME_COMPLETED]:
+            st.session_state[KEY_GAME_COMPLETED] = True
             
         st.markdown("""
         <div class="success-box">
@@ -137,9 +202,9 @@ def main():
         
         st.balloons()
         return
-
+    
     # Obtener pregunta actual
-    current_question = get_current_question(clues_data, progress_data)
+    current_question = get_current_question(clues_data)
     
     if not current_question:
         st.error("¡Ups! No se pudo encontrar la pregunta actual. Por favor, reinicia la aplicación.")
@@ -149,8 +214,14 @@ def main():
     progress_text = f"Acertijo {current_question['id']} de {clues_data['total_questions']}"
     st.progress(float(current_question['id']) / float(clues_data['total_questions']))
     st.markdown(f"<p style='text-align: center;'>{progress_text}</p>", unsafe_allow_html=True)
-
-    # Mostrar la pregunta actual
+    
+    # Si hay un mensaje del Genio para mostrar
+    if st.session_state[KEY_SHOW_GENIUS] and st.session_state[KEY_GENIUS_RESPONSE]:
+        genius_dialog(st.session_state[KEY_GENIUS_RESPONSE])
+        # Reset the flag immediately after showing the dialog
+        st.session_state[KEY_SHOW_GENIUS] = False
+        
+   # Mostrar la pregunta actual
     st.markdown(f"""
     <div class="highlight">
         <h2>Pregunta:</h2>
@@ -159,66 +230,75 @@ def main():
     """, unsafe_allow_html=True)
     
     # Sección para pistas
+    # Sección para pistas
     st.markdown("### Pistas disponibles:")
     
-    # Mostrar indicadores de pistas disponibles (bombillas)
-    max_clues = len(current_question['clues'])
+    # Mostrar indicadores de pistas disponibles
+    max_clues = len(current_question.get('clues', []))
     
-    # Crear HTML para los indicadores de pistas
-    clue_indicators_html = '<div class="clue-indicators">'
-    for i in range(max_clues):
-        if i in st.session_state.revealed_clues:
-            clue_indicators_html += f'<div class="clue-indicator clue-indicator-on">💡</div>'
-        else:
-            clue_indicators_html += f'<div class="clue-indicator clue-indicator-off">💡</div>'
-    clue_indicators_html += '</div>'
+    # Crear un contenedor flexible para los indicadores
+    st.markdown('<div class="clue-indicators">', unsafe_allow_html=True)
     
-    st.markdown(clue_indicators_html, unsafe_allow_html=True)
+    # Crear columnas en una sola fila para los indicadores
+    cols = st.columns(max_clues)
+    for i, col in enumerate(cols):
+        with col:
+            # Determinar si esta pista está encendida o apagada
+            is_revealed = i in st.session_state[KEY_REVEALED_CLUES]
+            is_next = i == len(st.session_state[KEY_REVEALED_CLUES])
+            
+            css_class = "clue-on" if is_revealed else "clue-off"
+            
+            # Solo habilitar clic para la siguiente pista disponible
+            if is_next:
+                if st.button("💡", key=f"clue_{i}"):
+                    st.session_state[KEY_REVEALED_CLUES].append(i)
+                    st.rerun()
+            else:
+                st.markdown(f'<div class="clue-container"><span class="clue-bulb {css_class}">💡</span></div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # Mostrar pistas ya reveladas
-    for i in st.session_state.revealed_clues:
-        if i < max_clues:
-            st.markdown(f"""
-            <div class="clue-box">
-                <p>🔍 {current_question['clues'][i]}</p>
-            </div>
-            """, unsafe_allow_html=True)
-    
-    # Botón para revelar una pista
-    if len(st.session_state.revealed_clues) < max_clues and not st.session_state.answer_correct:
-        next_clue_index = 0
-        while next_clue_index in st.session_state.revealed_clues and next_clue_index < max_clues:
-            next_clue_index += 1
-            
-        if next_clue_index < max_clues:
-            col1, col2, col3 = st.columns([1, 2, 1])
-            with col2:
-                if st.button("Revelar pista 💡"):
-                    st.session_state.revealed_clues.append(next_clue_index)
-                    st.session_state.last_clue_index = next_clue_index
-                    progress_data["clues_revealed"] = next_clue_index
-                    save_progress(progress_data)
-                    st.rerun()
+    if st.session_state[KEY_REVEALED_CLUES]:
+        for i in st.session_state[KEY_REVEALED_CLUES]:
+            if i < max_clues:
+                st.markdown(f"""
+                <div class="clue-box">
+                    <p>🔍 {current_question['clues'][i]}</p>
+                </div>
+                """, unsafe_allow_html=True)
     
     # Área para ingresar respuesta
     st.markdown("### Tu respuesta:")
-    with st.form("answer_form"):
-        user_answer = st.text_input("Escribe tu respuesta aquí o una pregunta para El Genio:", key="user_input")
+    
+    # Usamos una key única para el formulario basada en la pregunta actual
+    # para evitar problemas de estado persistente entre preguntas
+    form_key = f"form_{current_question['id']}"
+    
+    with st.form(form_key):
+        # Usamos una key única para el input basada en la pregunta actual
+        input_key = f"input_{current_question['id']}"
+        user_answer = st.text_input(
+            "Escribe tu respuesta aquí o una pregunta para El Genio:",
+            key=input_key
+        )
+        
         submit_col1, submit_col2 = st.columns(2)
         
         with submit_col1:
             submit_button = st.form_submit_button("Enviar respuesta ✅")
         
         with submit_col2:
-            help_button = st.form_submit_button("Consultar al Genio 🧞")
+            help_button = st.form_submit_button("Consultar al Genio 🧞‍♂️")
     
-    # Procesar envío de respuesta
+    # Procesar envío de respuesta - ESTE ES EL FLUJO CRÍTICO
     if submit_button and user_answer:
-        st.session_state.answer_submitted = True
-        st.session_state.need_genius_help = False
+        # Reiniciar TODOS los estados relacionados con el genio
+        st.session_state[KEY_SHOW_GENIUS] = False
+        st.session_state[KEY_GENIUS_RESPONSE] = ""
         
-        st.markdown("### Evaluando tu respuesta...")
-        
+        # Evaluar la respuesta
         is_correct, feedback = answer_grader(
             client, 
             deployment_name, 
@@ -227,60 +307,52 @@ def main():
             current_question['question']
         )
         
-        st.session_state.answer_correct = is_correct
-        st.session_state.answer_feedback = feedback
+        # Verificación adicional para asegurarse de que la respuesta está correctamente clasificada
+        feedback_text = feedback.strip()
+        is_correct = feedback_text.startswith("CORRECTO")
         
+        # Guardar el resultado y feedback
+        st.session_state[KEY_IS_CORRECT] = is_correct
+        st.session_state[KEY_FEEDBACK] = feedback
+        st.session_state[KEY_SUBMITTED] = True
+        
+        # SOLO si es correcta, avanzar a la siguiente pregunta
         if is_correct:
-            # Actualizar progreso
-            progress_data["completed_questions"].append(current_question['id'])
-            progress_data["current_question"] = current_question['id'] + 1
-            progress_data["clues_revealed"] = 0
-            save_progress(progress_data)
+            # Agregar a preguntas completadas y avanzar
+            if current_question['id'] not in st.session_state[KEY_COMPLETED_QUESTIONS]:
+                st.session_state[KEY_COMPLETED_QUESTIONS].append(current_question['id'])
             
-            st.session_state.last_clue_index = -1
-            st.session_state.revealed_clues = []
-            time.sleep(2)  # Pausa para celebración
+            # Efecto de celebración y avance
             st.balloons()
+            advance_to_next_question()
             st.rerun()
-    
-    # Procesar solicitud de ayuda al Genio
-    if help_button:
-        st.session_state.need_genius_help = True
-        st.session_state.answer_submitted = False
+
+    # Procesar solicitud de ayuda al Genio - movido después del procesamiento de respuesta
+    if help_button and user_answer:
+        # Limpiar cualquier estado previo del genio
+        st.session_state[KEY_SHOW_GENIUS] = False
+        st.session_state[KEY_GENIUS_RESPONSE] = ""
         
-        st.markdown("### El Genio dice:")
-        
-        # Obtener las pistas reveladas para pasar al asistente
+        # Obtener pistas reveladas para el asistente
         revealed_clues_content = []
-        for i in st.session_state.revealed_clues:
+        for i in st.session_state[KEY_REVEALED_CLUES]:
             if i < len(current_question['clues']):
                 revealed_clues_content.append(current_question['clues'][i])
         
-        # Pasar la consulta del usuario al Genio
+        # Obtener respuesta del Genio
         genius_response = clue_assistant(
             client,
             deployment_name,
-            current_question['clues'], 
+            current_question['clues'],
             current_question['question'],
             len(revealed_clues_content) - 1 if revealed_clues_content else -1,
-            user_answer  # Pasar la consulta del usuario
+            user_answer
         )
         
-        st.session_state.genius_response = genius_response
-        st.markdown(f"""
-        <div class="clue-box">
-            <p>{genius_response}</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Mostrar retroalimentación de respuesta
-    if st.session_state.answer_submitted:
-        st.markdown(f"""
-        <div class="{'success-box' if st.session_state.answer_correct else 'clue-box'}">
-            <p>{st.session_state.answer_feedback}</p>
-        </div>
-        """, unsafe_allow_html=True)
+        # Guardar la respuesta del Genio y activar su visualización
+        st.session_state[KEY_GENIUS_RESPONSE] = genius_response
+        st.session_state[KEY_SHOW_GENIUS] = True
+        st.rerun()
 
-# Ejecutar la aplicación
 if __name__ == "__main__":
     main()

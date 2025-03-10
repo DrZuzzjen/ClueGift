@@ -37,9 +37,15 @@ def answer_grader(client, deployment_name, user_answer, correct_answer, question
     La respuesta correcta es: "{correct_answer}"
     La respuesta del usuario es: "{user_answer}"
     
-    Responde SOLAMENTE con "CORRECTO" o "INCORRECTO" seguido de un breve comentario amigable.
+    Responde SOLAMENTE con uno de estos dos formatos exactos:
+    1. "CORRECTO! [tu mensaje amistoso aquí]" si la respuesta es correcta o muy cercana
+    2. "INCORRECTO. [tu consejo aquí]" si la respuesta es incorrecta
+    
     Si es CORRECTO, felicitala con calidez en un tono argentino, como si fueras su amigo/a.
     Si es INCORRECTO, dale un pequeño consejo para ayudarla, sin revelar la respuesta.
+    
+    NO menciones la palabra "CORRECTO" en una respuesta INCORRECTA, ni siquiera como parte de otra palabra.
+    NO menciones la palabra "INCORRECTO" en una respuesta CORRECTA, ni siquiera como parte de otra palabra.
     """
 
     # Llamada al modelo con streaming
@@ -59,17 +65,24 @@ def answer_grader(client, deployment_name, user_answer, correct_answer, question
     
     # Procesar respuesta streaming
     result = []
+    final_container = st.empty()  # Contenedor para el resultado final
     
     for chunk in response:
         if chunk.choices:
             content = chunk.choices[0].delta.content
             if content:
                 result.append(content)
-                result_placeholder.markdown("".join(result))
+                # Actualizar el contenedor con el texto actual
+                final_container.markdown("".join(result))
+    
+    # Limpiar el placeholder de carga
+    result_placeholder.empty()
     
     # Determinar si la respuesta es correcta
-    full_result = "".join(result)
-    is_correct = "CORRECTO" in full_result
+    full_result = "".join(result).strip()
+    
+    # Verificar si la respuesta comienza con "CORRECTO" (al inicio de la respuesta)
+    is_correct = full_result.startswith("CORRECTO")
     
     return is_correct, full_result
 
@@ -138,12 +151,17 @@ def clue_assistant(client, deployment_name, clues, question_text, clue_index=Non
     
     # Procesar respuesta streaming
     result = []
+    final_container = st.empty()  # Contenedor para el resultado final
     
     for chunk in response:
         if chunk.choices:
             content = chunk.choices[0].delta.content
             if content:
                 result.append(content)
-                result_placeholder.markdown("".join(result))
+                # Actualizar el contenedor con el texto actual
+                final_container.markdown("".join(result))
+    
+    # Limpiar el placeholder de carga
+    result_placeholder.empty()
     
     return "".join(result)
